@@ -6,7 +6,6 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: rgb(155,155,155);
     background-image: url('RPG_bcg.png'); /* Exemplo de padrão de vinhas */
     background-repeat: repeat;
     color: #fff;
