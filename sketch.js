@@ -21,7 +21,7 @@ let imagemDisplay; // Exibindo a imagem ao lado direito
 // Variável global para armazenar a URL da foto, se definida
 let fotoUrl = "";
 
-// Lista de 10 perícias com seus inputs
+// Lista de 10 perícias com seus inputs e seus rótulos
 let pericias = [
   "Atletismo",
   "Ocultismo",
@@ -31,10 +31,10 @@ let pericias = [
   "Programação",
   "Liderança",
   "Engenharia",
-  "Investigação",
-  "Furtividade"
+  "Investigação"
 ];
 let periciasInputs = [];
+let periciasLabels = []; // Array para armazenar os rótulos das perícias
 
 function limitarPericias() {
   let total = 0;
@@ -73,10 +73,10 @@ function limitarPericias() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   
-  // Cria os campos de entrada
+  // Cria os campos de entrada para Nome e Idade
   criarCamposDeEntrada();
   
-  // Define as posições dos círculos (atributos) de forma semelhante a um pentágono
+  // Define as posições dos círculos (atributos) em formato de pentágono
   let centroX = width / 2 + 150;  
   let centroY = 250;  
   let raio = 150;
@@ -86,7 +86,7 @@ function setup() {
     let angle = TWO_PI / 5 * i - PI / 2;
     let x = centroX + raio * cos(angle);
     let y = centroY + raio * sin(angle);
-    // Atualizado o valor de r para 35 (metade de 70) para refletir o novo diâmetro
+    // Diâmetro 70, então raio 35 para detecção de clique
     circulos.push({ x: x, y: y, r: 35 });
   }
   
@@ -110,7 +110,7 @@ function setup() {
 
   // Botão de reset
   resetButton = createButton('Reset');
-  resetButton.position(centroX - 65, centroY + 20);
+  resetButton.position(centroX - 65, centroY + 10);
   resetButton.size(120, 30);
   resetButton.mousePressed(resetAtributos);
   
@@ -137,26 +137,33 @@ function setup() {
   imagemDisplay.size(250, 250);
   
   // Criação dos campos para as 10 perícias (dispostos à direita)
-  let periciaXStart = width - 300;
+  let periciaXStart = width - 320;
   let periciaYStart = 80;
-  let rowSpacing = 50;
+  let rowSpacing = 60; // Distância "normal" (igual à altura do frame) para evitar sobreposição
   
   for (let i = 0; i < pericias.length; i++) {
-    let posX = periciaXStart;
-    let posY = periciaYStart + i * rowSpacing;
-    
+    // Cria o rótulo para a perícia e armazena em periciasLabels
     let label = createDiv(pericias[i]);
-    label.position(posX, posY);
-    label.style('color', '#fff');
-    label.style('font-size', '14px');
-    label.style('line-height', '30px');
+    // Posiciona o rótulo acima do frame
+    label.position(periciaXStart, periciaYStart + i * rowSpacing);
+    label.style('color', '#000000');
+    label.style('font-size', '17px');
+    label.style('z-index', '3');
+    periciasLabels.push(label);
     
+    // Cria o campo para o valor da perícia
     let input = createInput('0');
-    input.position(posX + 150, posY);
-    input.size(50, 30);
+    input.position(periciaXStart + 130, periciaYStart + i * rowSpacing);
+    input.size(100, 40);
     input.attribute("type", "number");
     input.attribute("min", "0");
     input.attribute("max", "5");
+    // Torna o input transparente para que o frame seja visível
+    input.style("background", "transparent");
+    input.style("border", "none");
+    input.style("text-align", "center");
+    input.style("z-index", "3");
+    input.style("transform", "translate(18px, -43px)");
     input.input(limitarPericias);
     periciasInputs.push(input);
   }
@@ -195,10 +202,8 @@ function draw() {
     let pos = circulos[i];
     
     fill(255);
-    // Aumentado de 50 para 70 o diâmetro do círculo
     ellipse(pos.x, pos.y, 70, 70);
     
-    // Os frames agora serão exibidos via elementos DOM posicionados via CSS.
     fill(0);
     textSize(16);
     textAlign(CENTER, CENTER);
@@ -207,17 +212,32 @@ function draw() {
     fill(255);
     textSize(12);
     textAlign(CENTER, CENTER);
-    // Ajustado o deslocamento para posicionar o nome abaixo do círculo maior
     text(atributos[i], pos.x, pos.y + 40);
   }
   
-  // Atualiza a posição dos elementos DOM dos frames para alinhar com os círculos
+  // Atualiza a posição dos elementos DOM dos frames dos atributos
   for (let i = 0; i < circulos.length; i++) {
     let frameElement = select("#frame" + i);
     if (frameElement) {
-      // Para elementos de 80px, deslocamos 40 para centralizar
-      frameElement.position(circulos[i].x - 48, circulos[i].y - 42);
+      frameElement.position(circulos[i].x - 48, circulos[i].y - 43);
     }
+  }
+  
+  // Atualiza a posição dos elementos DOM dos frames das perícias
+  for (let i = 0; i < periciasInputs.length; i++) {
+    let pos = periciasInputs[i].position();
+    let frameElement = select("#pericia-frame" + i);
+    if (frameElement) {
+      // Posiciona o frame 140px à esquerda do input (240 - 100 = 140)
+      frameElement.position(pos.x - 85, pos.y -50);
+    }
+  }
+  
+  // Atualiza a posição dos rótulos das perícias para que fiquem centralizados acima dos frames
+  for (let i = 0; i < periciasLabels.length; i++) {
+    let pos = periciasInputs[i].position();
+    let frameX = pos.x - 140; // mesma posição do frame
+    periciasLabels[i].position(frameX + 120 - (periciasLabels[i].elt.offsetWidth / 2), pos.y - 30);
   }
   
   // Título "Atributos"
